@@ -6,7 +6,7 @@ import keyboard
 from playsound import playsound
 import threading
 import sys
-import os
+import ocr
 
 if getattr(sys, 'frozen', False):
     base_path = sys._MEIPASS
@@ -14,31 +14,17 @@ else:
     base_path = os.path.dirname(__file__)
 
 ocr_path = os.path.join(base_path, "ocr.py")
-# ESC 눌렸는지 체크할 플래그
-stop_flag = False
 
-def esc_listener(proc):
+def esc_listener():
     keyboard.wait('esc')
     print("🚪 ESC 눌림 → OCR 프로세스 및 전체 종료")
-    try:
-        proc.terminate()  # OCR 프로세스 강제 종료
-    except Exception:
-        pass
     os._exit(0)  # 전체 종료
 
-
+threading.Thread(target=esc_listener, daemon=True).start()
 print("▶ 텍스트 인식 및 음성 출력 시작 (ESC를 누르면 종료)")
 
 while True:
-    # ✅ OCR 먼저 실행해서 proc 얻고
-    proc = subprocess.Popen(["python", ocr_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
-    # ✅ 그 다음에 proc을 넘겨서 esc_listener 실행
-    threading.Thread(target=esc_listener, args=(proc,), daemon=True).start()
-
-    # OCR stdout 결과 읽기
-    stdout, _ = proc.communicate()  # 여기서 OCR 실행 완료될 때까지 대기
-    text = stdout
+    text = ocr.quickstart()
 
     if not text.strip():
         print("⚠️ 텍스트 인식 실패")

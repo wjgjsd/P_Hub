@@ -3,54 +3,47 @@ import re
 import sys
 import time
 import take_photo
-import subprocess
-import take_photo
 from google.cloud import vision
+
 base_dir = getattr(sys, '_MEIPASS', os.path.dirname(__file__))
 key_path = os.path.join(base_dir, 'haca-459308-5f83d6e8fa46.json')
-take_photo_dir = os.path.join(base_dir, 'take_photo.py')
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_path
-def quickstart():
-    take_photo.take_photo()  # 먼저 새 사진 촬영
-    client = vision.ImageAnnotatorClient()
-    image_path = 'captured_image.jpg'
 
-    # ✅ 사진이 저장될 때까지 기다리기 (최대 5초)
-    for _ in range(50):  # 50 x 0.1초 = 5초
+def quickstart():
+    image_path = 'captured_image.jpg'
+    take_photo.take_photo()
+
+    # ✅ 저장 대기 (최대 5초)
+    for _ in range(50):
         if os.path.exists(image_path) and os.path.getsize(image_path) > 0:
             break
         time.sleep(0.1)
     else:
-        print("❌ 사진이 저장되지 않았습니다.")
-        return ''
+        print("❌ 사진 저장 실패")
+        return "FAIL"
 
-    while(True):
-        with open(image_path, 'rb') as image_file:
-            content = image_file.read()
+    client = vision.ImageAnnotatorClient()
+    with open(image_path, 'rb') as image_file:
+        content = image_file.read()
 
-        image = vision.Image(content=content)
-        response = client.text_detection(image=image)
+    image = vision.Image(content=content)
+    response = client.text_detection(image=image)
 
-        text = response.text_annotations
-        combined_text = ''
+    text = response.text_annotations
+    if not text:
+        print("❌ 텍스트 인식 실패")
+        return "텍스트가 감지되지 않았습니다. 사진을 다시 찍습니다."
 
-        if text:
-            combined_text = text[0].description
-            break
-        else:
-            print("텍스트가 감지되지 않았습니다. 사진을 다시 찍습니다.")
-            subprocess.run([sys.executable, take_photo_dir])
-
-    temp_text = re.sub(r'[^a-zA-Z0-9\s\uAC00-\uD7A3\.]', ' ', combined_text)
-    new_text = re.sub(r'[^a-zA-Z0-9\s\uAC00-\uD7A3\.]', ' ', temp_text)
-
-    #print(new_text)
+    combined_text = text[0].description
+    clean = re.sub(r'[^a-zA-Z0-9\s\uAC00-\uD7A3\.]', ' ', combined_text)
+    clean = re.sub(r'[^a-zA-Z0-9\s\uAC00-\uD7A3\.]', ' ', clean)
 
     if response.error.message:
         raise Exception(f'{response.error.message}')
     
-    return new_text
+    return clean
 
 if __name__ == '__main__':
-    text = quickstart()
-    print(text)
+    result = quickstart()
+    print(result)
+
