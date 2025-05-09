@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Text-to-Sound</title>
+</head>
+<body>
+  <h1>👁️‍🗨️ 시각장애인을 위한 Text-to-Sound</h1>
+  <textarea id="text-input" rows="4" cols="50" placeholder="텍스트를 입력하세요"></textarea><br>
+  <button onclick="sendText()">읽어줘!</button>
+
+  <audio id="player" controls autoplay hidden></audio>
+
+  <script>
+    function sendText() {
+      const text = document.getElementById('text-input').value;
+      fetch('/speak', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ text: text })
+      })
+      .then(response => response.blob())
+      .then(blob => {
+        const url = URL.createObjectURL(blob);
+        const player = document.getElementById('player');
+        player.src = url;
+        player.hidden = false;
+        player.play();
+      });
+    }
+  </script>
+</body>
+</html>
