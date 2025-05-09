@@ -25,7 +25,6 @@ print("▶ 텍스트 인식 및 음성 출력 시작 (ESC를 누르면 종료)")
 
 while True:
     text = ocr.quickstart()
-
     if not text.strip():
         print("⚠️ 텍스트 인식 실패")
         continue

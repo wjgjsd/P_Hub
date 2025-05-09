@@ -1,10 +1,20 @@
 def take_photo():
+    from gtts import gTTS
+    from playsound import playsound
+    import uuid
     import cv2
+    import os
 
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
         print("카메라를 열 수 없습니다.")
         return False
+    
+    filename = f"tts_{uuid.uuid4()}.mp3"
+    tts = gTTS("사진 찍을 준비가 되었습니다.", lang='ko')
+    tts.save(filename)
+    playsound(filename)
+    os.remove(filename)
 
     while True:
         ret, frame = cap.read()
