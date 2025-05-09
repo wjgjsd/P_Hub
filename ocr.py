@@ -4,11 +4,10 @@ from google.cloud import vision
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r'C:\\Users\\pjh\\Desktop\\Haca\\haca-459308-5f83d6e8fa46.json'
 
-def quickstart():
+def extract_text():
 
     client = vision.ImageAnnotatorClient()
 
-    #image_path = './images/22.png'
     image_path = './images/captured_image.jpg'
 
     with open(image_path, 'rb') as image_file:
@@ -31,6 +30,6 @@ def quickstart():
 
     if response.error.message:
         raise Exception(f'{response.error.message}')
-
+    return new_text
 if __name__ == '__main__':
-    quickstart()
+    extract_text()
