@@ -21,12 +21,12 @@ while True:
     # 키 입력 대기 (1ms)
     key = cv2.waitKey(1) & 0xFF
 
-    if key == 27:  # ESC키 종료
-        break
-    elif key == 32:  # 스페이스바
+    if key == 32:  # 사진 찍기
         # 사진 저장
         cv2.imwrite('captured_image.jpg', frame)
         print("사진이 'captured_image.jpg'로 저장되었습니다.")
+        break
+        
 
 # 자원 해제
 cap.release()
