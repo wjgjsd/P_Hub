@@ -9,31 +9,35 @@ import threading
 # ESC 눌렸는지 체크할 플래그
 stop_flag = False
 
-def esc_listener():
-    global stop_flag
+def esc_listener(proc):
     keyboard.wait('esc')
-    print("🚪 ESC 키 입력됨: 종료 준비 중...")
-    stop_flag = True
-    os._exit(0)
-
-# 백그라운드 ESC 감지 스레드 시작
-threading.Thread(target=esc_listener, daemon=True).start()
+    print("🚪 ESC 눌림 → OCR 프로세스 및 전체 종료")
+    try:
+        proc.terminate()  # OCR 프로세스 강제 종료
+    except Exception:
+        pass
+    os._exit(0)  # 전체 종료
 
 base_dir = os.path.dirname(__file__)
 ocr_path = os.path.join(base_dir, 'ocr.py')
 
 print("▶ 텍스트 인식 및 음성 출력 시작 (ESC를 누르면 종료)")
 
-while not stop_flag:
-    # ocr.py 실행해서 결과 얻기
-    result = subprocess.run(["python", ocr_path], capture_output=True, text=True)
-    text = result.stdout
+while True:
+    # ✅ OCR 먼저 실행해서 proc 얻고
+    proc = subprocess.Popen(["python", ocr_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+    # ✅ 그 다음에 proc을 넘겨서 esc_listener 실행
+    threading.Thread(target=esc_listener, args=(proc,), daemon=True).start()
+
+    # OCR stdout 결과 읽기
+    stdout, _ = proc.communicate()  # 여기서 OCR 실행 완료될 때까지 대기
+    text = stdout
 
     if not text.strip():
-        print("⚠️ 텍스트가 인식되지 않았습니다.")
+        print("⚠️ 텍스트 인식 실패")
         continue
 
-    # gTTS로 음성 출력
     filename = f"tts_{uuid.uuid4()}.mp3"
     tts = gTTS(text=text.strip(), lang='ko')
     tts.save(filename)
