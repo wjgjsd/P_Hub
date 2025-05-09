@@ -7,7 +7,7 @@ if not cap.isOpened():
     print("카메라를 열 수 없습니다.")
     exit()
 
-print("스페이스바를 누르면 사진이 저장됩니다. ESC를 누르면 종료합니다.")
+#print("스페이스바를 누르면 사진이 저장됩니다. ESC를 누르면 종료합니다.")
 
 while True:
     ret, frame = cap.read()
@@ -24,7 +24,7 @@ while True:
     if key == 32:  # 사진 찍기
         # 사진 저장
         cv2.imwrite('captured_image.jpg', frame)
-        print("사진이 'captured_image.jpg'로 저장되었습니다.")
+        #print("사진이 'captured_image.jpg'로 저장되었습니다.")
         break
         
 

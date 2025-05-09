@@ -37,6 +37,8 @@ def quickstart():
 
     if response.error.message:
         raise Exception(f'{response.error.message}')
+    
+    return new_text
 
 if __name__ == '__main__':
     quickstart()
