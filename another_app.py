@@ -5,7 +5,15 @@ import subprocess
 import keyboard
 from playsound import playsound
 import threading
+import sys
+import os
 
+if getattr(sys, 'frozen', False):
+    base_path = sys._MEIPASS
+else:
+    base_path = os.path.dirname(__file__)
+
+ocr_path = os.path.join(base_path, "ocr.py")
 # ESC 눌렸는지 체크할 플래그
 stop_flag = False
 
@@ -18,8 +26,6 @@ def esc_listener(proc):
         pass
     os._exit(0)  # 전체 종료
 
-base_dir = os.path.dirname(__file__)
-ocr_path = os.path.join(base_dir, 'ocr.py')
 
 print("▶ 텍스트 인식 및 음성 출력 시작 (ESC를 누르면 종료)")
 

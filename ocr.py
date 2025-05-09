@@ -1,17 +1,28 @@
 import os
 import re
+import sys
+import time
 import take_photo
 import subprocess
+import take_photo
 from google.cloud import vision
-base_dir = os.path.dirname(__file__)
+base_dir = getattr(sys, '_MEIPASS', os.path.dirname(__file__))
 key_path = os.path.join(base_dir, 'haca-459308-5f83d6e8fa46.json')
 take_photo_dir = os.path.join(base_dir, 'take_photo.py')
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_path
 def quickstart():
-    
+    take_photo.take_photo()  # 먼저 새 사진 촬영
     client = vision.ImageAnnotatorClient()
-
     image_path = 'captured_image.jpg'
+
+    # ✅ 사진이 저장될 때까지 기다리기 (최대 5초)
+    for _ in range(50):  # 50 x 0.1초 = 5초
+        if os.path.exists(image_path) and os.path.getsize(image_path) > 0:
+            break
+        time.sleep(0.1)
+    else:
+        print("❌ 사진이 저장되지 않았습니다.")
+        return ''
 
     while(True):
         with open(image_path, 'rb') as image_file:
@@ -28,12 +39,12 @@ def quickstart():
             break
         else:
             print("텍스트가 감지되지 않았습니다. 사진을 다시 찍습니다.")
-            subprocess.run(["python", take_photo_dir])
+            subprocess.run([sys.executable, take_photo_dir])
 
     temp_text = re.sub(r'[^a-zA-Z0-9\s\uAC00-\uD7A3\.]', ' ', combined_text)
     new_text = re.sub(r'[^a-zA-Z0-9\s\uAC00-\uD7A3\.]', ' ', temp_text)
 
-    print(new_text)
+    #print(new_text)
 
     if response.error.message:
         raise Exception(f'{response.error.message}')
@@ -41,4 +52,5 @@ def quickstart():
     return new_text
 
 if __name__ == '__main__':
-    quickstart()
+    text = quickstart()
+    print(text)
