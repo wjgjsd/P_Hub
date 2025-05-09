@@ -8,7 +8,8 @@ def quickstart():
 
     client = vision.ImageAnnotatorClient()
 
-    image_path = './images/22.png'
+    #image_path = './images/22.png'
+    image_path = './images/captured_image.jpg'
 
     with open(image_path, 'rb') as image_file:
         content = image_file.read()
